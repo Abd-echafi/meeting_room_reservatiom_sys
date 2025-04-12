@@ -1,14 +1,13 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db'); // adjust path to your config
-const bcrypt = require("bcryptjs");
+const sequelize = require('../config/db');
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require('uuid');
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.STRING,
     primaryKey: true,
     allowNull: false,
-    unique: true,
     defaultValue: uuidv4,
   },
   name: {
@@ -66,22 +65,27 @@ const User = sequelize.define('User', {
   profession: {
     type: DataTypes.STRING(255),
   },
-  password_reset_token: {
-    type: DataTypes.STRING(255),
-  },
-  token_expires_at: {
+  passwordChangedAt: {
     type: DataTypes.DATE,
-  },
+    allowNull: true,
+  }
 }, {
   tableName: 'users',
   timestamps: false, // we manually manage created_at and updated_at
   hooks: {
     beforeCreate: async (user, options) => {
-      console.log("hook accessed in success");
       // Only hash the password if it's modified or new
       if (user.password && user.changed('password')) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
+      }
+    },
+    beforeUpdate: async (user, options) => {
+      console.log("hook entered");
+      if (user.password && user.changed('password')) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+        user.passwordChangedAt = new Date();
       }
     },
   }
@@ -93,7 +97,15 @@ User.prototype.correctPassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+User.prototype.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return JWTTimestamp < changedTimestamp;
+  }
 
+  // Password not changed after token issued
+  return false;
+};
 
 
 module.exports = User;

@@ -11,6 +11,7 @@ cloudinary.config({
 
 exports.uploadMultiple = async (req, res, next) => {
   try {
+
     const images = req.files;
     // Upload all images in parallel using Promise.all
     const uploadPromises = images.map(image =>
@@ -27,6 +28,9 @@ exports.uploadMultiple = async (req, res, next) => {
 exports.uploadSingle = async (req, res, next) => {
   try {
     // Upload the image directly to Cloudinary
+    if (!req.file) {
+      return next();
+    }
     const result = await cloudinary.uploader.upload(req.file.path, {
       resource_type: "auto"
     });

@@ -5,8 +5,15 @@ const passport = require('passport');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const authRouter = require("./routes/authenticationRoutes");
-const User = require("./models/user.model")
+const userRouter = require("./routes/userRoutes");
+const roomRouter = require('./routes/roomRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
+const User = require("./models/user.model");
+const Room = require("./models/roomModel");
+const Booking = require("./models/bookingModel");
+const Image = require('./models/imageModel');
 require('dotenv').config();
 
 const app = express();
@@ -25,6 +32,11 @@ app.use(passport.session());
 
 // Middleware setup
 app.use(express.json());
+app.use(cookieParser());
+// Use express.json() and express.urlencoded() to parse form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors());
 app.use(helmet());
 if (process.env.NODE_ENV === 'development') {
@@ -34,7 +46,9 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.static(path.join(__dirname, 'public')));
 // Mount routes
 app.use('/api/v1/auth', authRouter);
-
+app.use('/api/v1/user', userRouter);
+app.use("/api/v1/rooms", roomRouter);
+app.use("/api/v1/bookings", bookingRouter);
 // Handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({

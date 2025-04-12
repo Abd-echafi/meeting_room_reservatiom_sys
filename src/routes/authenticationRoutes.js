@@ -4,7 +4,7 @@ const Router = express.Router();
 const passport = require('passport');
 const Cloudinary = require('../config/cloudinary');
 const upload = require("../middlewares/multer");
-
+const bcrypt = require("bcryptjs");
 
 Router.route('/signup').post(upload.single("image"), Cloudinary.uploadSingle, signup);
 Router.route('/login').post(login);
