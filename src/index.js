@@ -25,7 +25,7 @@ app.use(session({
     saveUninitialized: true,    // Store sessions even if they're uninitialized
     cookie: { secure: false }   // Set to true if using https, or in production environments
 }));
-
+app.use(cors());
 // Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());

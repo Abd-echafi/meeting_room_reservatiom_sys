@@ -12,6 +12,7 @@ Router.route('/login').post(login);
 Router.route('/forgot-password').post(sendResetCode);
 Router.route('/verify-reset-code').post(verifyResetCode);
 Router.route('/reset-password').post(resetPassword);
+// Router.route('/me').get()
 //redirects the user to Google’s OAuth consent screen
 Router.route('/google').get(passport.authenticate('google', {
   scope: ['profile', 'email']
@@ -23,17 +24,12 @@ Router.route('/callback').get(
   (req, res) => {
     console.log(req.user);
     const token = signToken(req.user.id)
-    // res.redirect(`http://localhost:5173/dashboard?token=${token}`);
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(Date.now() + cookieExpiresIn * 24 * 60 * 60 * 1000),
     });
-    // JSON response
-    res.status(statusCode).json({
-      status: 'success',
-      data: user,
-    });
+    res.redirect(`http://localhost:5173/auth/login?email=${req.user.email}`);
   });
 
 module.exports = Router;
