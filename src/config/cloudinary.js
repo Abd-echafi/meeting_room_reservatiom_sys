@@ -15,7 +15,10 @@ exports.uploadMultiple = async (req, res, next) => {
     const images = req.files;
     // Upload all images in parallel using Promise.all
     const uploadPromises = images.map(image =>
-      cloudinary.uploader.upload(image.path, { resource_type: "auto" })
+      cloudinary.uploader.upload(image.path, {
+        resource_type: "auto", transformation: [{ width: 300, height: 300, crop: 'limit' }],
+        quality: "auto",
+      })
     );
 
     const results = await Promise.all(uploadPromises);
