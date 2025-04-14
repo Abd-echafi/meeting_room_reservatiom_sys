@@ -5,6 +5,7 @@ const passport = require('passport');
 const Cloudinary = require('../config/cloudinary');
 const upload = require("../middlewares/multer");
 const bcrypt = require("bcryptjs");
+require('dotenv').config();
 
 Router.route('/signup').post(upload.single("image"), Cloudinary.uploadSingle, signup);
 Router.route('/login').post(login);
@@ -22,7 +23,17 @@ Router.route('/callback').get(
   (req, res) => {
     console.log(req.user);
     const token = signToken(req.user.id)
-    res.redirect(`http://localhost:5173/dashboard?token=${token}`);
+    // res.redirect(`http://localhost:5173/dashboard?token=${token}`);
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: new Date(Date.now() + cookieExpiresIn * 24 * 60 * 60 * 1000),
+    });
+    // JSON response
+    res.status(statusCode).json({
+      status: 'success',
+      data: user,
+    });
   });
 
 module.exports = Router;
