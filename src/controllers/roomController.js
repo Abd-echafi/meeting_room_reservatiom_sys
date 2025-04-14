@@ -52,6 +52,7 @@ const getAllAvailableRooms = async (req, res, next) => {
             },
           },
         ],
+        status: "Confirmed",
       },
     });
     const bookedRoomIds = overlappingBookings.map(b => b.room_id);
