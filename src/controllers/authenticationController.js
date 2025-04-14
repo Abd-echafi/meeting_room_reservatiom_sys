@@ -10,7 +10,7 @@ const { log } = require('console');
 require('dotenv').config();
 // Generate JWT
 const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, {
-  expiresIn: "7h",
+  expiresIn: "999h",
 });
 
 // Send Token Response
@@ -41,13 +41,20 @@ const createSendToken = (user, statusCode, res) => {
 // User Signup
 const signup = async (req, res, next) => {
   try {
+    const user = await User.findOne({
+      where: { email: req.body.email }
+    });
+    if (user) {
+      return new AppError(err.message, 400);
+    }
     if (req.image) {
       req.body.image = req.image
     }
+
     const newUser = await User.create(req.body);
     createSendToken(newUser, 201, res);
   } catch (err) {
-    next(new AppError(err.message, 400));
+    next(err);
   }
 };
 
@@ -62,11 +69,10 @@ const login = async (req, res, next) => {
     if (!email || !password) {
       throw new AppError('Please provide email and password', 400);
     }
-
     // Find user and include password field
     const user = await User.findOne({
       where: { email },
-      attributes: ['id', 'name', 'email', 'password'], // Specify the attributes you want to retrieve, including 'password'
+      // attributes: ['id', 'name', 'email', 'password'], // Specify the attributes you want to retrieve, including 'password'
     });
     // Verify user and password
     if (!user || !(await user.correctPassword(password))) {
@@ -76,7 +82,7 @@ const login = async (req, res, next) => {
     // Send token to user
     createSendToken(user, 200, res);
   } catch (err) {
-    next(new AppError('Login failed', 500));
+    next(err);
   }
 };
 
@@ -122,7 +128,6 @@ const sendResetCode = async (req, res, next) => {
 
     return res.status(200).json({ success: true, message: 'Password reset code sent to email' });
   } catch (err) {
-    console.log(err.message);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
@@ -156,11 +161,11 @@ const resetPassword = async (req, res) => {
     }
 
     // Update the user's password 
-    await User.update(
+    await user.update(
       {
         resetCodeExpiresAt: null,
         resetCode: null,
-        password: Password,
+        password: newPassword,
       },
       {
         where: { email: email },

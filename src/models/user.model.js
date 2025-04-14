@@ -83,6 +83,7 @@ const User = sequelize.define('User', {
     beforeUpdate: async (user, options) => {
       console.log("hook entered");
       if (user.password && user.changed('password')) {
+        console.log("password changed");
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
         user.passwordChangedAt = new Date();
