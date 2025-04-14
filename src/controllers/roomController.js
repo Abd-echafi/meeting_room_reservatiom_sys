@@ -1,6 +1,8 @@
 const Room = require('../models/roomModel');
 const AppError = require('../utils/AppError');
-const Image = require('../models/imageModel')
+const Image = require('../models/imageModel');
+const Booking = require('../models/bookingModel');
+const { Op } = require('sequelize');
 require('dotenv').config();
 
 // get all rooms 
@@ -16,6 +18,61 @@ const getAllRooms = async (req, res, next) => {
   }
 }
 
+
+
+//get all avvailable rooms 
+const getAllAvailableRooms = async (req, res, next) => {
+  try {
+    const { start_time, end_time } = req.body;
+
+    if (!start_time || !end_time) {
+      return res.status(400).json({ error: 'start_time and end_time are required' });
+    }
+
+    // Step 1: Get bookings that overlap the given range
+    const overlappingBookings = await Booking.findAll({
+      where: {
+        [Op.or]: [
+          {
+            start_time: {
+              [Op.between]: [start_time, end_time],
+            },
+          },
+          {
+            end_time: {
+              [Op.between]: [start_time, end_time],
+            },
+          },
+          {
+            start_time: {
+              [Op.lte]: start_time,
+            },
+            end_time: {
+              [Op.gte]: end_time,
+            },
+          },
+        ],
+      },
+    });
+    const bookedRoomIds = overlappingBookings.map(b => b.room_id);
+    // Step 2: Get rooms that are NOT in those bookedRoomIds
+    const availableRooms = await Room.findAll({
+      where: {
+        id: {
+          [Op.notIn]: bookedRoomIds,
+        },
+        status: 'Available',
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: availableRooms,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 // get one room by id
 
 const getOneRoomById = async (req, res, next) => {
@@ -109,4 +166,4 @@ const deleteRoom = async (req, res, next) => {
 }
 
 
-module.exports = { getAllRooms, getOneRoomById, updateRoom, deleteRoom, createRoom };
+module.exports = { getAllRooms, getAllAvailableRooms, getOneRoomById, updateRoom, deleteRoom, createRoom };
