@@ -53,7 +53,7 @@ const updateUser = async (req, res) => {
     const updatedUser = await User.findByPk(req.user.id);
     res.status(200).json({
       status: "success",
-      data: updatedUser,
+      data: { ...updatedUser },
 
     })
   } catch (err) {
