@@ -8,7 +8,7 @@ require('dotenv').config();
 // get all rooms 
 const getAllRooms = async (req, res, next) => {
   try {
-    const rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description'], include: [{ model: Image, as: 'images', attributes: ['image'], }] });
+    const rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities'], include: [{ model: Image, as: 'images', attributes: ['image'], }] });
     res.status(200).json({
       status: "success",
       rooms,
@@ -131,8 +131,8 @@ const updateRoom = async (req, res, next) => {
     if (!room) {
       next(new AppError("room not found"), 404);
     }
-    const { name, capacity, amenities, type, note, description, status } = req.body;
-    const initialObj = { name, capacity, amenities, type, note, description, status };
+    const { name, capacity, amenities, type, note, description, status, pricing } = req.body;
+    const initialObj = { name, capacity, amenities, type, note, description, status, pricing };
     const finalObj = {};
     for (const key in initialObj) {
       if (initialObj.hasOwnProperty(key)) {

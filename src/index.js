@@ -25,7 +25,10 @@ app.use(session({
     saveUninitialized: true,    // Store sessions even if they're uninitialized
     cookie: { secure: false }   // Set to true if using https, or in production environments
 }));
-app.use(cors());
+app.use(cors({
+    origin: '*', // Your frontend domain
+    credentials: true,               // Important! Allows sending cookies
+}));
 // Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
@@ -36,8 +39,6 @@ app.use(cookieParser());
 // Use express.json() and express.urlencoded() to parse form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(cors());
 app.use(helmet());
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));

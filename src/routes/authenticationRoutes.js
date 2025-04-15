@@ -29,7 +29,7 @@ Router.route('/callback').get(
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(Date.now() + cookieExpiresIn * 24 * 60 * 60 * 1000),
     });
-    res.redirect(`http://localhost:5173/auth/login?email=${req.user.email}`);
+    res.redirect(`http://localhost:5173/auth/login`);
   });
 
 module.exports = Router;
