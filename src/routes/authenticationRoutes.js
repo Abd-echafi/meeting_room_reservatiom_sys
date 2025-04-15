@@ -12,7 +12,7 @@ Router.route('/login').post(login);
 Router.route('/forgot-password').post(sendResetCode);
 Router.route('/verify-reset-code').post(verifyResetCode);
 Router.route('/reset-password').post(resetPassword);
-// Router.route('/me').get()
+
 //redirects the user to Google’s OAuth consent screen
 Router.route('/google').get(passport.authenticate('google', {
   scope: ['profile', 'email']

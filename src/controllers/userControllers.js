@@ -1,6 +1,18 @@
 const User = require('../models/user.model');
 const AppError = require('../utils/AppError');
 require('dotenv').config();
+//get all users 
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.findAll();
+    res.status(200).json({
+      status: "success",
+      data: users
+    })
+  } catch (err) {
+    next(err);
+  }
+}
 
 //get one user by id 
 const getOneById = async (req, res, next) => {
@@ -105,4 +117,4 @@ const deleteUser = async (req, res) => {
   }
 }
 
-module.exports = { getOneById, updateUser, updateUserPassword, deleteUser };
+module.exports = { getOneById, getAllUsers, updateUser, updateUserPassword, deleteUser };

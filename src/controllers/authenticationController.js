@@ -45,7 +45,7 @@ const signup = async (req, res, next) => {
       where: { email: req.body.email }
     });
     if (user) {
-      return new AppError(err.message, 400);
+      throw new AppError("this email is already in use login using it", 400);
     }
     if (req.image) {
       req.body.image = req.image
