@@ -19,6 +19,8 @@ Router.route('/google').get(passport.authenticate('google', {
 }));
 
 //google redirect user the the url : api/v1/auth/google/callback
+const cookieExpiresIn = process.env.JWT_COOKIE_EXPIRES_IN || 7;
+
 Router.route('/callback').get(
   passport.authenticate('google', { session: false }),
   (req, res) => {

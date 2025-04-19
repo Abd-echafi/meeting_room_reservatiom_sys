@@ -1,8 +1,11 @@
-const app = require('./index'); // Import the app instance
+const httpServer = require('./index'); // Import the app instance
 const sequelize = require('./config/db');
 
+const { initSocket } = require('./config/socketIO');
 require('dotenv').config(); // Load environment variables
 
+
+const io = initSocket(httpServer);
 const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
@@ -11,8 +14,8 @@ const startServer = async () => {
     await sequelize.sync({ alter: true }); // ✅ Await this!
     console.log('✅ Models synced successfully.');
     // Start the server
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    httpServer.listen(PORT, () => {
+      console.log(`Server running on port 3000`);
     });
   } catch (err) {
     console.error('Failed to start server:', err.message);

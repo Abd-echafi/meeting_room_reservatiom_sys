@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { createServer } = require("http");
 const session = require('express-session');
 const passport = require('passport');
 const morgan = require('morgan');
@@ -17,7 +18,7 @@ const Image = require('./models/imageModel');
 require('dotenv').config();
 
 const app = express();
-
+const httpServer = createServer(app);
 // Set up session middleware
 app.use(session({
     secret: 'your_secret_key',  // You can change this to a more secure secret
@@ -26,7 +27,7 @@ app.use(session({
     cookie: { secure: false }   // Set to true if using https, or in production environments
 }));
 app.use(cors({
-    origin: '*', // Your frontend domain
+    origin: 'https://localhost:5173', // Your frontend domain
     credentials: true,               // Important! Allows sending cookies
 }));
 // Initialize Passport.js
@@ -67,4 +68,4 @@ app.use((err, req, res, next) => {
 });
 
 // Export the app instance
-module.exports = app;
+module.exports = httpServer;

@@ -1,0 +1,68 @@
+const { Op } = require('sequelize');
+
+class APIFeatures {
+  constructor(model, queryfile) {
+    this.model = model;
+    this.queryfile = queryfile;
+    this.options = {
+      where: {}
+    };
+  }
+
+  filter = () => {
+    const { minPrice, maxPrice, status } = this.queryfile;
+    if (status) {
+      if (status === 'history') {
+        this.options.where.status = {
+          [Op.in]: ['confirmed', 'canceled']
+        };
+      }
+      else {
+        this.options.where.status = status;
+      }
+    }
+    if (minPrice || maxPrice) {
+      this.options.where.price = {};
+      if (minPrice) this.options.where.price[Op.gte] = Number(minPrice);
+      if (maxPrice) this.options.where.price[Op.lte] = Number(maxPrice);
+    }
+
+    return this;
+  }
+
+  sort = () => {
+    if (this.queryfile.sort) {
+      const sortFields = this.queryfile.sort.split(',').map(field => {
+        if (field.startsWith('-')) {
+          return [field.substring(1), 'DESC'];
+        } else {
+          return [field, 'ASC'];
+        }
+      });
+      this.options.order = sortFields;
+    }
+    return this;
+  }
+
+  paginate = () => {
+    const page = parseInt(this.queryfile.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    this.options.limit = limit;
+    this.options.offset = offset;
+
+    return this;
+  }
+
+  exec = () => {
+    if (model === 'Booking') {
+      return this.model.findAll(this.options, { include: [{ model: Room, as: 'room', attributes: ['pricing'], }] });
+    } else {
+      return this.model.findAll(this.options);
+    }
+
+  }
+}
+
+module.exports = APIFeatures;

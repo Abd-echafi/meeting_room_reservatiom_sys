@@ -93,6 +93,7 @@ const getOneRoomById = async (req, res, next) => {
 // create a room 
 const createRoom = async (req, res, next) => {
   try {
+    console.log("okk");
     const room = await Room.create(req.body);
     const imageArray = [];
     for (const image of req.images) {

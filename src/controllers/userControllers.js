@@ -73,6 +73,19 @@ const updateUser = async (req, res) => {
   }
 }
 
+const updateUserRole = async (req, res, next) => {
+  try {
+    const newRole = req.body.role;
+    await User.update({ role_name: newRole }, { where: { id: req.params.id } });
+    const updatedUser = await User.findByPk(req.params.id);
+    res.status(200).json({
+      status: "success",
+      data: updatedUser,
+    })
+  } catch (err) {
+    next(err)
+  }
+}
 //fucntion to update user password
 const updateUserPassword = async (req, res, next) => {
   try {
@@ -117,4 +130,4 @@ const deleteUser = async (req, res) => {
   }
 }
 
-module.exports = { getOneById, getAllUsers, updateUser, updateUserPassword, deleteUser };
+module.exports = { getOneById, getAllUsers, updateUser, updateUserRole, updateUserPassword, deleteUser };

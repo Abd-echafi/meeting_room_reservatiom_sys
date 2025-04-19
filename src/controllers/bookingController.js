@@ -1,9 +1,14 @@
 const Booking = require('../models/bookingModel');
 const AppError = require('../utils/AppError');
-
+const Room = require('../models/roomModel');
+const APIFeatures = require('../utils/feautures');
 const getAllBookings = async (req, res, next) => {
   try {
-    const bookings = await Booking.findAll();
+    const bookings = new APIFeatures(Booking, req.query)
+      .filter()
+      .sort()
+      .paginate();
+    //await Booking.findAll({ include: [{ model: Room, as: 'room', attributes: ['pricing'], }] });
     res.status(200).json({
       status: "success",
       bookings,

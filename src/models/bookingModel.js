@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-
+const Room = require('./roomModel');
 const Booking = sequelize.define('Booking', {
   id: {
     type: DataTypes.INTEGER,
@@ -81,5 +81,17 @@ Booking.associate = (models) => {
     onDelete: 'CASCADE',
   });
 };
+Booking.belongsTo(Room, {
+  foreignKey: 'room_id',
+  as: 'room', // ✅ Must match the query alias
+});
+
+Room.hasMany(Booking, {
+  foreignKey: 'room_id',
+  as: 'bookings', // You can keep this for the other direction
+});
+
+
+
 module.exports = Booking;
 
