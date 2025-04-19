@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
-
+const Room = require('../models/roomModel');
+const Image = require('../models/imageModel');
 class APIFeatures {
   constructor(model, queryfile) {
     this.model = model;
@@ -10,7 +11,8 @@ class APIFeatures {
   }
 
   filter = () => {
-    const { minPrice, maxPrice, status } = this.queryfile;
+    const { minPrice, maxPrice, status, search } = this.queryfile;
+    if (search) this.options.where.name = { [Op.like]: `%s${search}%` };
     if (status) {
       if (status === 'history') {
         this.options.where.status = {
@@ -56,12 +58,11 @@ class APIFeatures {
   }
 
   exec = () => {
-    if (model === 'Booking') {
-      return this.model.findAll(this.options, { include: [{ model: Room, as: 'room', attributes: ['pricing'], }] });
-    } else {
-      return this.model.findAll(this.options);
+    if (this.model === 'Booking') {
+      console.log('okk');
+      this.options.include = [{ model: Room, as: 'room', attributes: ['pricing'], }]
     }
-
+    return this.model.findAll(this.options);
   }
 }
 

@@ -2,6 +2,7 @@ const Room = require('../models/roomModel');
 const AppError = require('../utils/AppError');
 const Image = require('../models/imageModel');
 const Booking = require('../models/bookingModel');
+const APIFeatures = require('../utils/feautures');
 const { Op } = require('sequelize');
 require('dotenv').config();
 
@@ -57,14 +58,15 @@ const getAllAvailableRooms = async (req, res, next) => {
     });
     const bookedRoomIds = overlappingBookings.map(b => b.room_id);
     // Step 2: Get rooms that are NOT in those bookedRoomIds
-    const availableRooms = await Room.findAll({
-      where: {
-        id: {
-          [Op.notIn]: bookedRoomIds,
-        },
-        status: 'Available',
-      },
-    });
+    const features = new APIFeatures(Room, req.query).filter()
+      .sort()
+      .paginate();
+    features.options.attributes = ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities']
+    features.options.include = [{ model: Image, as: 'images', attributes: ['image'], }]
+    features.options.where.id = { [Op.notIn]: bookedRoomIds }
+    features.options.where.status = 'Available';
+    console.log(features.options);
+    const availableRooms = await features.exec();
 
     res.status(200).json({
       status: "success",
@@ -90,6 +92,7 @@ const getOneRoomById = async (req, res, next) => {
     return (new AppError(err.message, 400));
   }
 }
+
 // create a room 
 const createRoom = async (req, res, next) => {
   try {
