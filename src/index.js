@@ -20,6 +20,11 @@ require('dotenv').config();
 const app = express();
 const httpServer = createServer(app);
 // Set up session middleware
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "script-src 'self' https://cdn.socket.io");
+    next();
+});
+
 app.use(session({
     secret: 'your_secret_key',  // You can change this to a more secure secret
     resave: false,              // Don't save session if unmodified
@@ -27,7 +32,7 @@ app.use(session({
     cookie: { secure: false }   // Set to true if using https, or in production environments
 }));
 app.use(cors({
-    origin: 'https://localhost:5173', // Your frontend domain
+    origin: 'http://localhost:5173', // Your frontend domain
     credentials: true,               // Important! Allows sending cookies
 }));
 // Initialize Passport.js

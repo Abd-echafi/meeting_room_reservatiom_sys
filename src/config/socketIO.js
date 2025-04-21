@@ -1,7 +1,7 @@
 const { Server } = require("socket.io");
 
 let io;
-
+const userSocketMap = {};
 function initSocket(server) {
   io = new Server(server, {
     cors: {
@@ -13,19 +13,20 @@ function initSocket(server) {
   //each user login we automatocally add his id and socket.id to the map 
   io.on("connection", (socket) => {
     socket.on("register", (userId) => {
-      userSocketMap.set(userId, socket.id);
+      userSocketMap[userId.user_id] = socket.id;
       console.log(`User ${userId} connected with socket ID ${socket.id}`);
+      console.log(userSocketMap);
     });
     //before disconnect we need to remove that user from the userSocketMap
-    socket.on("disconnect", () => {
-      for (const [userId, socketId] of userSocketMap.entries()) {
-        if (socketId === socket.id) {
-          userSocketMap.delete(userId);
-          console.log(`User ${userId} disconnected`);
+    socket.on('disconnect', () => {
+      for (const [userId, id] of Object.entries(userSocketMap)) {
+        if (id === socket.id) {
+          delete userSocketMap[userId];
           break;
         }
       }
     });
+
 
   });
 
@@ -39,4 +40,4 @@ function getIO() {
   return io;
 }
 
-module.exports = { initSocket, getIO };
+module.exports = { initSocket, getIO, userSocketMap };

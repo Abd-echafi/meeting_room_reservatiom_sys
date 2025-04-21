@@ -163,7 +163,8 @@ const deleteRoom = async (req, res, next) => {
     if (!room) {
       next(new AppError("room not found"), 404);
     }
-    await Room.destroy({ where: { id: req.params.id } });
+    await Booking.destroy({ where: { room_id: req.params.id } })
+    await room.destroy({ where: { id: req.params.id } });
     res.status(204).json({})
   } catch (err) {
     return (new AppError(err.message, 400));

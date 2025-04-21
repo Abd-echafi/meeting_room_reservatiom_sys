@@ -48,8 +48,8 @@ const createBooking = async (req, res, next) => {
 
 const updateBooking = async (req, res, next) => {
   try {
-    console.log(req.body);
-    await Booking.update(req.body, { where: { id: req.params.id } })
+    const booking = await Booking.findByPk(req.params.id)
+    await booking.update(req.body)
     const updatedBooking = await Booking.findByPk(req.params.id);
     res.status(200).json({
       status: "success",

@@ -78,6 +78,7 @@ const updateUserRole = async (req, res, next) => {
     const newRole = req.body.role;
     await User.update({ role_name: newRole }, { where: { id: req.params.id } });
     const updatedUser = await User.findByPk(req.params.id);
+    console.log(updatedUser);
     res.status(200).json({
       status: "success",
       data: updatedUser,
