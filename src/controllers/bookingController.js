@@ -3,7 +3,6 @@ const AppError = require('../utils/AppError');
 const APIFeatures = require('../utils/feautures');
 const getAllBookings = async (req, res, next) => {
   try {
-
     const features = new APIFeatures(Booking, req.query)
       .filter()
       .sort()

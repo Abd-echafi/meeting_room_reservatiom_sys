@@ -18,15 +18,16 @@ const createNotification = async (user_id, message, status, type) => {
 // Get all notifications for a user
 const getNotificationsByUser = async (req, res, next) => {
   try {
+    console.log("okk");
     const notifications = await Notification.findAll({
       where: { user_id: req.user.id },
       order: [['created_at', 'DESC']], // Optional: order by creation date
     });
     res.status(200).json({
       status: "success",
-      notificaion,
+      notifications,
     })
-  } catch (error) {
+  } catch (err) {
     next(new AppError(err.message, 400));
   }
 };
@@ -37,9 +38,9 @@ const getNotificationById = async (req, res, next) => {
     const notification = await Notification.findByPk(req.params.id);
     res.status(200).json({
       status: "success",
-      notificaion,
+      notification,
     })
-  } catch (error) {
+  } catch (err) {
     next(new AppError(err.message, 400));
   }
 };
@@ -47,24 +48,28 @@ const getNotificationById = async (req, res, next) => {
 const updateNotification = async (req, res, next) => {
   try {
     const notification = await Notification.findByPk(req.params.id);
-    if (!notification) throw new Error("Notification not found");
+    if (!notification) throw new AppError("Notification not found", 400);
     if (req.body.status) {
       await notification.update({ status: req.body.status }, { where: { id: req.params.id } });
+    } else {
+      throw new AppErrorError("you can just update the notification status", 400);
     }
-    return notification;
+    res.status(200).json({
+      status: "success",
+      notification,
+    })
   } catch (error) {
     next(err);
   }
 };
 //delete notification
-const deleteNotification = async (notification_id) => {
+const deleteNotification = async (req, res, next) => {
   try {
     const notification = await Notification.findByPk(req.params.id);
-    if (!notification) throw new Error("Notification not found");
-
+    if (!notification) throw new AppError("Notification not found");
     await notification.destroy();
-    return { message: "Notification deleted successfully" };
-  } catch (error) {
+    res.status(204).json({})
+  } catch (err) {
     next(err);
   }
 };

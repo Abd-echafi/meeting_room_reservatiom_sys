@@ -76,6 +76,40 @@ const getAllAvailableRooms = async (req, res, next) => {
     next(err);
   }
 }
+//get the bookings start-end time for a room for a specific day
+const getBookingsForRoomOnDate = async (req, res, next) => {
+  try {
+    if (!req.body.date) {
+      throw new AppError("you must enter a date", 400);
+      return;
+    }
+    const date = new Date(req.body.date);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const bookings = await Booking.findAll({
+      where: {
+        room_id: req.params.roomId,
+        start_time: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
+        status: "Confirmed",
+      },
+      attributes: ["start_time", "end_time"]
+    });
+    res.status(200).json({
+      status: "success",
+      bookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
 // get one room by id
 
 const getOneRoomById = async (req, res, next) => {
@@ -172,4 +206,4 @@ const deleteRoom = async (req, res, next) => {
 }
 
 
-module.exports = { getAllRooms, getAllAvailableRooms, getOneRoomById, updateRoom, deleteRoom, createRoom };
+module.exports = { getAllRooms, getAllAvailableRooms, getOneRoomById, updateRoom, deleteRoom, createRoom, getBookingsForRoomOnDate };

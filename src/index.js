@@ -11,10 +11,7 @@ const authRouter = require("./routes/authenticationRoutes");
 const userRouter = require("./routes/userRoutes");
 const roomRouter = require('./routes/roomRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
-const User = require("./models/user.model");
-const Room = require("./models/roomModel");
-const Booking = require("./models/bookingModel");
-const Image = require('./models/imageModel');
+const notificaionRouter = require('./routes/notificationsRoutes')
 require('dotenv').config();
 
 const app = express();
@@ -56,6 +53,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use("/api/v1/rooms", roomRouter);
 app.use("/api/v1/bookings", bookingRouter);
+app.use('/api/v1/notifications', notificaionRouter);
 // Handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({

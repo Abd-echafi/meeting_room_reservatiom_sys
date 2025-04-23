@@ -6,7 +6,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const passport = require('passport');
 const bcrypt = require("bcryptjs");
-const { log } = require('console');
+const { textTemplate, htmlTemplate } = require('../utils/resetPassword');
+
 require('dotenv').config();
 // Generate JWT
 const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -98,7 +99,7 @@ const sendResetCode = async (req, res, next) => {
     }
 
     // Generate a 6-digit random code
-    const resetCode = crypto.randomBytes(3).toString('hex'); // Generates a 6-digit hex code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
     await User.update(
       {
         resetCode,
@@ -108,6 +109,10 @@ const sendResetCode = async (req, res, next) => {
         where: { email: req.body.email }
       }
     );
+
+    const txtTamplate = textTemplate(user.name, resetCode);
+    const template = htmlTemplate(user.name, resetCode);
+
     // Send the reset code to the user's email via Nodemailer
     const transporter = nodemailer.createTransport({
       service: 'gmail', // Use your email service provider
@@ -121,13 +126,15 @@ const sendResetCode = async (req, res, next) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Password Reset Code',
-      text: `Your password reset code is: ${resetCode}`,
+      text: txtTamplate,
+      html: template,
     };
 
     await transporter.sendMail(mailOptions);
 
     return res.status(200).json({ success: true, message: 'Password reset code sent to email' });
   } catch (err) {
+    console.log(err.message);
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }

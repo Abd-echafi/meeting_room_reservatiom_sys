@@ -5,6 +5,8 @@ const { getIO, userSocketMap } = require('../config/socketIO');
 const Notification = require('../models/NotificationModel');
 const User = require('../models/user.model');
 const nodemailer = require('nodemailer');
+const { CancelationTextTemplate, CancelationHtmlTemplate } = require('../utils/bookingCancellation');
+const { ConfirmationTextTemplate, ConfirmationHtmlTemplate } = require('../utils/bookingConfirmation');
 require('dotenv').config();
 const Booking = sequelize.define('Booking', {
   id: {
@@ -75,66 +77,69 @@ const Booking = sequelize.define('Booking', {
   //
   hooks: {
     beforeUpdate: async (booking, options) => {
-      console.log("hook entered");
-      console.log(booking.status);
-      console.log(booking.changed('status'));
-      console.log(booking.status && booking.changed('status'));
       if (booking.status && booking.changed('status')) {
-        console.log("condition entred");
-        console.log('userSocketMap : ', userSocketMap);
         const socketId = userSocketMap[booking.user_id];
-        console.log(socketId);
+        const user = await User.findByPk(booking.user_id);
+        const room = await Room.findByPk(booking.room_id);
+
+        if (!user || !room) return; // safety check
+
+        const email = user.email;
+        const formattedDate = new Date(booking.start_time).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+          },
+        });
+
+        const notif = {
+          user_id: booking.user_id,
+          status: booking.status === 'Confirmed' ? 'Sent' : 'Read',
+          type: 'Booking',
+          message: booking.status === 'Confirmed'
+            ? "Your booking has been confirmed."
+            : "Your booking has been Canceled.",
+        };
+
+        const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: booking.status === 'Confirmed'
+            ? 'Your Booking is Confirmed ✅ '
+            : 'Your Booking is Canceled ❌ ',
+          html: '',
+          // text: '',
+        };
+        // Choose templates
+        if (booking.status === 'Confirmed') {
+          mailOptions.html = ConfirmationHtmlTemplate(user.name, formattedDate, booking.id, room.name);
+          mailOptions.text = ConfirmationTextTemplate(user.name, formattedDate, booking.id, room.name);
+        } else if (booking.status === 'Canceled') {
+          mailOptions.html = CancelationHtmlTemplate(user.name, formattedDate, booking.id, room.name);
+          mailOptions.text = CancelationTextTemplate(user.name, formattedDate, booking.id, room.name);
+        }
+        console.log(mailOptions.html);
+        // Send email
+        await transporter.sendMail(mailOptions);
+
+        // Create notification
+        const notification = await Notification.create(notif);
+
+        // Emit socket notification if connected
         if (socketId) {
-          const user = await User.findByPk(booking.user_id)
-          const email = user.email;
-          const transporter = nodemailer.createTransport({
-            service: 'gmail', // Use your email service provider
-            auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASS,
-            },
-          });
-          if (booking.status === 'Confirmed') {
-            const notif = {
-              user_id: booking.user_id, // The ID of the user (must match an existing user in the 'users' table)
-              message: "Your booking has been confirmed.",
-              status: "Sent", // Can be either 'Sent' or 'Read'
-              type: "Booking", // Can be 'Booking' or 'Feedback'
-            };
-
-
-            const mailOptions = {
-              from: process.env.EMAIL_USER,
-              to: email,
-              subject: 'Your Booking is Confirmed ✅ ',
-              text: `booking confirmed`,
-            };
-
-            await transporter.sendMail(mailOptions);
-            const notification = await Notification.create(notif);
-            getIO().to(socketId).emit('notification', notification);
-          }
-          else if (booking.status === 'Canceled') {
-            const notif = {
-              user_id: booking.user_id, // The ID of the user (must match an existing user in the 'users' table)
-              message: "Your booking has been canceled.",
-              status: "Sent", // Can be either 'Sent' or 'Read'
-              type: "Booking", // Can be 'Booking' or 'Feedback'
-            };
-            const mailOptions = {
-              from: process.env.EMAIL_USER,
-              to: email,
-              subject: 'Your Booking is canceled ❌ ',
-              text: `booking canceled`,
-            };
-            await transporter.sendMail(mailOptions);
-            const notification = await Notification.create(notif);
-            getIO().to(socketId).emit('notification', notification);
-          }
+          getIO().to(socketId).emit('notification', notification);
         }
       }
     },
   }
+
 });
 
 // Associations (to be set up outside the model definition)

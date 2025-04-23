@@ -28,13 +28,13 @@ const Notification = sequelize.define('Notification', {
     type: DataTypes.ENUM('Booking', 'Feedback'),
     allowNull: false,
   },
-  // created_at: {
-  //   type: DataTypes.TIMESTAMP,
-  //   defaultValue: DataTypes.NOW,
-  // },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
 }, {
   tableName: 'NOTIFICATIONS', // Table name
-  timestamps: false, // Sequelize will not automatically add createdAt/updatedAt fields
+  timestamps: true, // Sequelize will not automatically add createdAt/updatedAt fields
 });
 
 module.exports = Notification;
