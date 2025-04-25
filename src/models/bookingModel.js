@@ -15,7 +15,7 @@ const Booking = sequelize.define('Booking', {
     primaryKey: true,
   },
   user_id: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING(36),
     allowNull: false,
   },
   room_id: {
@@ -106,6 +106,7 @@ const Booking = sequelize.define('Booking', {
           message: booking.status === 'Confirmed'
             ? "Your booking has been confirmed."
             : "Your booking has been Canceled.",
+          bookingId: booking.id,
         };
 
         const mailOptions = {
@@ -143,20 +144,15 @@ const Booking = sequelize.define('Booking', {
 });
 
 // Associations (to be set up outside the model definition)
-Booking.associate = (models) => {
-  Booking.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    onDelete: 'CASCADE',
-  });
-
-  Booking.belongsTo(models.Room, {
-    foreignKey: 'room_id',
-    onDelete: 'CASCADE',
-  });
-};
+Booking.belongsTo(User, {
+  foreignKey: 'user_id',
+  onDelete: 'CASCADE',
+  as: 'user',
+});
 Booking.belongsTo(Room, {
   foreignKey: 'room_id',
   as: 'room', // ✅ Must match the query alias
+  onDelete: 'CASCADE',
 });
 
 Room.hasMany(Booking, {
@@ -164,7 +160,15 @@ Room.hasMany(Booking, {
   as: 'bookings', // You can keep this for the other direction
 });
 
+User.hasMany(Booking, {
+  foreignKey: 'user_id',
+  as: 'bookings', // You can keep this for the other direction
+});
 
+Notification.belongsTo(Booking, {
+  foreignKey: 'bookingId', // or 'booking_id' if you prefer snake_case
+  as: 'booking',
+});
 
 module.exports = Booking;
 

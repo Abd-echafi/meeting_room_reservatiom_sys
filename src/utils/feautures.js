@@ -11,12 +11,13 @@ class APIFeatures {
   }
 
   filter = () => {
-    const { minPrice, maxPrice, status, search } = this.queryfile;
-    if (search) this.options.where.name = { [Op.like]: `%s${search}%` };
+    const { minPrice, maxPrice, status, search, capacity } = this.queryfile;
+    if (search) this.options.where.name = { [Op.like]: `%${search}%` };
+    if (capacity) this.options.where.capacity = { [Op.gte]: capacity };
     if (status) {
-      if (status === 'history') {
+      if (status === 'other') {
         this.options.where.status = {
-          [Op.in]: ['confirmed', 'canceled']
+          [Op.in]: ['Confirmed', 'Canceled']
         };
       }
       else {

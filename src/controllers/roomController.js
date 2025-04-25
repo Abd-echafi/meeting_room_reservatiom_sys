@@ -9,7 +9,8 @@ require('dotenv').config();
 // get all rooms 
 const getAllRooms = async (req, res, next) => {
   try {
-    const rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities'], include: [{ model: Image, as: 'images', attributes: ['image'], }] });
+    const search = req.query.search;
+    const rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities'], include: [{ model: Image, as: 'images', attributes: ['image'], }], where: { name: { [Op.like]: `%${search}%` } } });
     res.status(200).json({
       status: "success",
       rooms,
@@ -24,46 +25,47 @@ const getAllRooms = async (req, res, next) => {
 //get all avvailable rooms 
 const getAllAvailableRooms = async (req, res, next) => {
   try {
-    const { start_time, end_time } = req.body;
-
-    if (!start_time || !end_time) {
-      return res.status(400).json({ error: 'start_time and end_time are required' });
+    console.log(req.query);
+    const { start_time, end_time } = req.query;
+    let bookedRoomIds;
+    if (start_time || end_time) {
+      // Step 1: Get bookings that overlap the given range
+      const overlappingBookings = await Booking.findAll({
+        where: {
+          [Op.or]: [
+            {
+              start_time: {
+                [Op.between]: [start_time, end_time],
+              },
+            },
+            {
+              end_time: {
+                [Op.between]: [start_time, end_time],
+              },
+            },
+            {
+              start_time: {
+                [Op.lte]: start_time,
+              },
+              end_time: {
+                [Op.gte]: end_time,
+              },
+            },
+          ],
+          status: "Confirmed",
+        },
+      });
+      bookedRoomIds = overlappingBookings.map(b => b.room_id);
+      // return res.status(400).json({ error: 'start_time and end_time are required' });
     }
-
-    // Step 1: Get bookings that overlap the given range
-    const overlappingBookings = await Booking.findAll({
-      where: {
-        [Op.or]: [
-          {
-            start_time: {
-              [Op.between]: [start_time, end_time],
-            },
-          },
-          {
-            end_time: {
-              [Op.between]: [start_time, end_time],
-            },
-          },
-          {
-            start_time: {
-              [Op.lte]: start_time,
-            },
-            end_time: {
-              [Op.gte]: end_time,
-            },
-          },
-        ],
-        status: "Confirmed",
-      },
-    });
-    const bookedRoomIds = overlappingBookings.map(b => b.room_id);
+    console.log(bookedRoomIds);
     // Step 2: Get rooms that are NOT in those bookedRoomIds
     const features = new APIFeatures(Room, req.query).filter()
       .sort()
       .paginate();
     features.options.attributes = ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities']
     features.options.include = [{ model: Image, as: 'images', attributes: ['image'], }]
-    features.options.where.id = { [Op.notIn]: bookedRoomIds }
+    if (bookedRoomIds) features.options.where.id = { [Op.notIn]: bookedRoomIds }
     features.options.where.status = 'Available';
     console.log(features.options);
     const availableRooms = await features.exec();

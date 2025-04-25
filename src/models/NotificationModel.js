@@ -16,6 +16,14 @@ const Notification = sequelize.define('Notification', {
     },
     onDelete: 'CASCADE',
   },
+  bookingId: {
+    type: DataTypes.INTEGER, // or UUID if your Booking model uses UUIDs
+    references: {
+      model: 'bookings',
+      key: 'id',
+    },
+    allowNull: false,
+  },
   message: {
     type: DataTypes.TEXT,
     allowNull: false,
@@ -36,5 +44,10 @@ const Notification = sequelize.define('Notification', {
   tableName: 'NOTIFICATIONS', // Table name
   timestamps: true, // Sequelize will not automatically add createdAt/updatedAt fields
 });
+
+// Notification.belongsTo(Booking, {
+//   foreignKey: 'bookingId', // or 'booking_id' if you prefer snake_case
+//   as: 'booking',
+// });
 
 module.exports = Notification;
