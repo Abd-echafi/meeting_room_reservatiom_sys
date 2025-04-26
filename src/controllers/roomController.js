@@ -10,7 +10,13 @@ require('dotenv').config();
 const getAllRooms = async (req, res, next) => {
   try {
     const search = req.query.search;
-    const rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities'], include: [{ model: Image, as: 'images', attributes: ['image'], }], where: { name: { [Op.like]: `%${search}%` } } });
+    let rooms;
+    if (search) {
+      rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities'], include: [{ model: Image, as: 'images', attributes: ['image'], }], where: { name: { [Op.like]: `%${search}%` } } });
+    } else {
+      rooms = await Room.findAll({ attributes: ['id', 'name', 'type', 'status', 'note', 'description', 'pricing', 'amenities'], include: [{ model: Image, as: 'images', attributes: ['image'], }] });
+    }
+
     res.status(200).json({
       status: "success",
       rooms,
