@@ -4,7 +4,11 @@ require('dotenv').config();
 //get all users 
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      attributes: {
+        exclude: ['password', 'created_at', 'updated_at', 'resetCodeExpiresAt', 'resetCode', 'passwordChangedAt']
+      }
+    });
     res.status(200).json({
       status: "success",
       data: users

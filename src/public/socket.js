@@ -1,7 +1,7 @@
 // Just use the global `io` directly, no need to import or require
 const socket = io("http://localhost:3000"); // Or your server URL
 
-const userId = '7ebcc3f6-d46e-4ec9-a7b4-b7f41e95e22f'; // Replace with real test user ID
+const userId = '26dc7a53-b3be-4841-a1ee-1ba2997080c5'; // Replace with real test user ID
 
 socket.on("connect", () => {
   console.log("✅ Connected to backend as", socket.id);

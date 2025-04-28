@@ -45,7 +45,18 @@ const getOneBookingById = async (req, res, next) => {
   }
 }
 
-
+//get bookings by user
+const getBookingsByUser = async (req, res, next) => {
+  try {
+    const bookings = await Booking.findAll({ where: { user_id: req.params.id } });
+    res.status(200).json({
+      status: "success",
+      bookings,
+    })
+  } catch (err) {
+    next(err);
+  }
+}
 
 const createBooking = async (req, res, next) => {
   try {
@@ -83,4 +94,4 @@ const deleteBooking = async (req, res, next) => {
   }
 }
 
-module.exports = { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings }
+module.exports = { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings, getBookingsByUser }

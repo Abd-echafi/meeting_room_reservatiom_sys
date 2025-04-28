@@ -1,12 +1,13 @@
 const express = require('express');
 const { protect, restrictTo } = require('../controllers/authenticationController');
-const { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings } = require('../controllers/bookingController');
+const { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings, getBookingsByUser } = require('../controllers/bookingController');
 const Router = express.Router();
 
 Router.route("/")
   .get(protect, restrictTo('Admin', 'Booking Manager'), getAllBookings)
   .post(protect, restrictTo('Client', 'Admin', 'Booking Manager'), createBooking)
 
+Router.route('/user/:id').get(protect, getBookingsByUser)
 Router.route('/:id')
   .get(protect, restrictTo('Admin', 'Booking Manager', 'Client'), getOneBookingById)
   .patch(protect, restrictTo('Admin', 'Booking Manager'), updateBooking)

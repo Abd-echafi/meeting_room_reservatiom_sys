@@ -87,30 +87,57 @@ const getAllAvailableRooms = async (req, res, next) => {
 //get the bookings start-end time for a room for a specific day
 const getBookingsForRoomOnDate = async (req, res, next) => {
   try {
-    if (!req.body.date) {
-      throw new AppError("you must enter a date", 400);
-      return;
-    }
-    const date = new Date(req.body.date);
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    // if (!req.body.date) {
+    //   throw new AppError("you must enter a date", 400);
+    // }
+    // const date = new Date(req.body.date);
+    // const startOfDay = new Date(date);
+    // startOfDay.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
+    // const endOfDay = new Date(date);
+    // endOfDay.setHours(23, 59, 59, 999);
+    const weekNumber = req.query.page;
+    // 1. Define time range 
+    const now = new Date();
+    const threeMonthsLater = new Date();
+    threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+    // 2. Fetch bookings between now and 12 weeks later
     const bookings = await Booking.findAll({
       where: {
         room_id: req.params.roomId,
         start_time: {
-          [Op.between]: [startOfDay, endOfDay],
+          [Op.between]: [now, threeMonthsLater],
         },
         status: "Confirmed",
       },
-      attributes: ["start_time", "end_time"]
+      attributes: ["start_time", "end_time"],
+      order: [["start_time", "ASC"]],
     });
+    // 3. Initialize empty structure: 12 weeks, each week 7 days
+    const weeks = Array.from({ length: 12 }, () => Array.from({ length: 7 }, () => []));
+
+    // 4. Process each booking
+    for (const booking of bookings) {
+      const startDate = new Date(booking.start_time);
+
+      // Calculate difference in days from now
+      const diffInTime = startDate.getTime() - now.getTime();
+      const diffInDays = Math.floor(diffInTime / (1000 * 60 * 60 * 24)); // 1 day = 86400000 ms
+
+      if (diffInDays >= 0 && diffInDays < 12 * 7) {
+        const weekIndex = Math.floor(diffInDays / 7); // which week
+        const dayIndex = diffInDays % 7;              // which day in the week
+
+        weeks[weekIndex][dayIndex].push({
+          start_time: booking.start_time,
+          end_time: booking.end_time,
+        });
+      }
+    }
+    const finalBookings = weeks[weekNumber - 1];
     res.status(200).json({
       status: "success",
-      bookings,
+      data: finalBookings,
     });
   } catch (err) {
     next(err);

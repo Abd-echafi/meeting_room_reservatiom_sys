@@ -31,6 +31,7 @@ const Notification = sequelize.define('Notification', {
   status: {
     type: DataTypes.ENUM('Sent', 'Read'),
     allowNull: false,
+    defaultValue: 'Sent',
   },
   type: {
     type: DataTypes.ENUM('Booking', 'Feedback'),

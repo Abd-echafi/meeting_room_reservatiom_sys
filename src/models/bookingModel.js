@@ -101,7 +101,6 @@ const Booking = sequelize.define('Booking', {
 
         const notif = {
           user_id: booking.user_id,
-          status: booking.status === 'Confirmed' ? 'Sent' : 'Read',
           type: 'Booking',
           message: booking.status === 'Confirmed'
             ? "Your booking has been confirmed."
@@ -126,7 +125,6 @@ const Booking = sequelize.define('Booking', {
           mailOptions.html = CancelationHtmlTemplate(user.name, formattedDate, booking.id, room.name);
           mailOptions.text = CancelationTextTemplate(user.name, formattedDate, booking.id, room.name);
         }
-        console.log(mailOptions.html);
         // Send email
         await transporter.sendMail(mailOptions);
 
