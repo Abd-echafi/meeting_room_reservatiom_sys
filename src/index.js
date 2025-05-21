@@ -50,6 +50,9 @@ if (process.env.NODE_ENV === 'development') {
 // Serve static files from "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
 // Mount routes
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', userRouter);
 app.use("/api/v1/rooms", roomRouter);
