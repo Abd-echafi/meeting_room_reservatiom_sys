@@ -1,0 +1,63 @@
+const { DataTypes, ENUM, INTEGER } = require('sequelize');
+const sequelize = require('../config/db');
+const Room = require('./roomModel');
+const User = require('./user.model');
+
+
+const Review = sequelize.define('Review', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  user_id: {
+    type: DataTypes.STRING(36),
+    allowNull: false,
+  },
+  room_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  comment: {
+    type: DataTypes.STRING(250),
+    allowNull: true,
+  },
+  rating: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
+  },
+}, {
+  tableName: 'REVIEW',
+  timestamps: false,
+  underscored: true,
+});
+
+// Define associations
+Room.hasMany(Review, {
+  foreignKey: 'room_id',
+});
+
+User.hasMany(Review, {
+  foreignKey: 'user_id',
+});
+
+Review.belongsTo(User, {
+  foreignKey: 'user_id',
+  onDelete: 'CASCADE',
+  as: 'user',
+});
+
+Review.belongsTo(Room, {
+  foreignKey: 'room_id',
+  onDelete: 'CASCADE',
+  as: 'room',
+});
+
+
+
+
+module.exports = Review;

@@ -22,7 +22,9 @@ const Notification = sequelize.define('Notification', {
       model: 'bookings',
       key: 'id',
     },
-    allowNull: false,
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    allowNull: true,
   },
   message: {
     type: DataTypes.TEXT,
@@ -34,8 +36,8 @@ const Notification = sequelize.define('Notification', {
     defaultValue: 'Sent',
   },
   type: {
-    type: DataTypes.ENUM('Booking', 'Feedback'),
-    allowNull: false,
+    type: DataTypes.ENUM('Booking'),
+    allowNull: true,
   },
   created_at: {
     type: DataTypes.DATE,

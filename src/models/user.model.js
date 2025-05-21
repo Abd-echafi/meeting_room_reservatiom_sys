@@ -108,5 +108,4 @@ User.prototype.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
-
 module.exports = User;

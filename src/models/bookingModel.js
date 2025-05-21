@@ -1,4 +1,7 @@
 const { DataTypes } = require('sequelize');
+const { Op } = require('sequelize');
+const AppError = require('../utils/AppError');
+require('dotenv').config();
 const sequelize = require('../config/db');
 const Room = require('./roomModel');
 const { getIO, userSocketMap } = require('../config/socketIO');
@@ -7,6 +10,7 @@ const User = require('../models/user.model');
 const nodemailer = require('nodemailer');
 const { CancelationTextTemplate, CancelationHtmlTemplate } = require('../utils/bookingCancellation');
 const { ConfirmationTextTemplate, ConfirmationHtmlTemplate } = require('../utils/bookingConfirmation');
+const { emptyRoomTextTemplate, emptyRoomHtmlTemplate } = require('../utils/roomEmpty');
 require('dotenv').config();
 const Booking = sequelize.define('Booking', {
   id: {
@@ -52,6 +56,10 @@ const Booking = sequelize.define('Booking', {
   status: {
     type: DataTypes.ENUM('Pending', 'Confirmed', 'Canceled'),
     defaultValue: 'Pending',
+  },
+  OldStatus: {
+    type: DataTypes.ENUM('Pending', 'Confirmed', 'Canceled'),
+    defaultValue: null,
   },
   created_at: {
     type: DataTypes.DATE,
@@ -122,6 +130,9 @@ const Booking = sequelize.define('Booking', {
           mailOptions.html = ConfirmationHtmlTemplate(user.name, formattedDate, booking.id, room.name);
           mailOptions.text = ConfirmationTextTemplate(user.name, formattedDate, booking.id, room.name);
         } else if (booking.status === 'Canceled') {
+          if (booking.OldStatus === 'Confirmed') {
+            await handleCancelation(booking, transporter, room.name)
+          }
           mailOptions.html = CancelationHtmlTemplate(user.name, formattedDate, booking.id, room.name);
           mailOptions.text = CancelationTextTemplate(user.name, formattedDate, booking.id, room.name);
         }
@@ -168,5 +179,79 @@ Notification.belongsTo(Booking, {
   as: 'booking',
 });
 
+
+
+
+const handleCancelation = async (booking, transporter, name) => {
+  try {
+    const { start_time, end_time } = booking;
+    const overlappingBookings = await Booking.findAll({
+      where: {
+        [Op.or]: [
+          {
+            start_time: {
+              [Op.between]: [start_time, end_time],
+            },
+          },
+          {
+            end_time: {
+              [Op.between]: [start_time, end_time],
+            },
+          },
+          {
+            start_time: {
+              [Op.lte]: start_time,
+            },
+            end_time: {
+              [Op.gte]: end_time,
+            },
+          },
+        ],
+        status: "Pending",
+      },
+      include: [
+        {
+          model: User, // make sure User model is imported
+          as: 'user',
+          attributes: ['name', 'email'], // choose fields you want to include
+        },
+      ],
+    });
+    if (overlappingBookings.length === 0) {
+      return;
+    }
+    const promises = overlappingBookings.map(async (item) => {
+      const formattedDate = new Date(item.start_time).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: item.user.email,
+        subject: 'Room is available',
+        text: '',
+        html: '',
+      };
+      mailOptions.text = emptyRoomTextTemplate(item.user.name, formattedDate, item.id, name);
+      mailOptions.html = emptyRoomHtmlTemplate(item.user.name, formattedDate, item.id, name);
+      return transporter.sendMail(mailOptions);
+    });
+    await Promise.all(promises);
+    const ids = overlappingBookings.map((item) => {
+      return item.id;
+    })
+    await Booking.destroy({
+      where: {
+        id: {
+          [Op.in]: ids
+        }
+      }
+    });
+  } catch (err) {
+    throw new AppError(err.message, 400)
+  }
+}
 module.exports = Booking;
 

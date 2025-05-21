@@ -74,6 +74,10 @@ const createBooking = async (req, res, next) => {
 const updateBooking = async (req, res, next) => {
   try {
     const booking = await Booking.findByPk(req.params.id)
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    req.body.OldStatus = booking.status;
     await booking.update(req.body)
     const updatedBooking = await Booking.findByPk(req.params.id);
     res.status(200).json({
@@ -93,5 +97,6 @@ const deleteBooking = async (req, res, next) => {
     return next(new AppError(err.message, 400));
   }
 }
+
 
 module.exports = { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings, getBookingsByUser }

@@ -11,8 +11,8 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Connection has been established successfully.');
-    await sequelize.sync({ alter: true }); // ✅ Await this!
-    console.log('✅ Models synced successfully.');
+    // await sequelize.sync({ alter: true }); // ✅ Await this!
+    // console.log('✅ Models synced successfully.');
     // Start the server
     httpServer.listen(PORT, () => {
       console.log(`Server running on port 3000`);

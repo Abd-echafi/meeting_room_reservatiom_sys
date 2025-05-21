@@ -45,4 +45,22 @@ exports.uploadSingle = async (req, res, next) => {
     next(new AppError(err.message || "Image upload failed", 400));
   }
 };
+
+
+const uploadFile = async (filePath) => {
+  try {
+    if (!filePath) {
+      throw new AppError("file does not exists", 404);
+    }
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      resource_type: "auto"
+    });
+
+    imageURL = result.secure_url; // Store image URL in request
+    return imageURL
+  } catch (err) {
+    console.log(err);
+    throw new AppError(err.message || "Image upload failed", 400);
+  }
+};
 // module.exports = uploadMultiple;
