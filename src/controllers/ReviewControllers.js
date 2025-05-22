@@ -77,7 +77,7 @@ const getAllReviewsForRoom = async (req, res, next) => {
     let { sortRating, sortTime } = req.query
     let rating = [];
     rating[0] = req.query.rating;
-    const room_id = req.body.room_id;
+    const room_id = req.body.id;
     if (!room_id) {
       res.status(400).json({
         status: "fail",
