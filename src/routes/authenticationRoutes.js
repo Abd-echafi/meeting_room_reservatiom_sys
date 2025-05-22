@@ -29,8 +29,10 @@ Router.route('/callback').get(
     res.cookie('jwt', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       expires: new Date(Date.now() + cookieExpiresIn * 24 * 60 * 60 * 1000),
     });
+
     res.redirect(`https://room-reservation-lovat.vercel.app/auth/login/continue-with-google`);
   });
 
