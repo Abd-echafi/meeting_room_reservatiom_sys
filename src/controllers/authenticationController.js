@@ -249,7 +249,9 @@ const restrictTo = (...roles) => (req, res, next) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:3000/api/v1/auth/callback",
+  callbackURL: process.env.NODE_ENV === 'production'
+    ? "https://meeting-room-reservatiom-sys.onrender.com/api/v1/auth/google"
+    : "http://localhost:3000/api/v1/auth/google",
   passReqToCallback: true
 },
   function (request, accessToken, refreshToken, profile, done) {

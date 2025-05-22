@@ -31,7 +31,7 @@ Router.route('/callback').get(
       secure: process.env.NODE_ENV === 'production',
       expires: new Date(Date.now() + cookieExpiresIn * 24 * 60 * 60 * 1000),
     });
-    res.redirect(`http://localhost:5173/auth/login/continue-with-google`);
+    res.redirect(`https://room-reservation-lovat.vercel.app/auth/login/continue-with-google`);
   });
 
 module.exports = Router;

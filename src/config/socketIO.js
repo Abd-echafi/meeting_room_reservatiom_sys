@@ -5,7 +5,7 @@ const userSocketMap = {};
 function initSocket(server) {
   io = new Server(server, {
     cors: {
-      origin: ["http://localhost:5173"], // Allow connections from these frontend URLs
+      origin: ["https://room-reservation-lovat.vercel.app"], // Allow connections from these frontend URLs
       methods: ["GET", "POST"],
       credentials: true
     }
