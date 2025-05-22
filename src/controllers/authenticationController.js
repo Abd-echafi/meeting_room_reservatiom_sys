@@ -250,7 +250,7 @@ passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: process.env.NODE_ENV === 'production'
-    ? "https://meeting-room-reservatiom-sys.onrender.com/api/v1/auth/google"
+    ? "https://room-reservation-lovat.vercel.app/api/v1/auth/google"
     : "http://localhost:3000/api/v1/auth/google",
   passReqToCallback: true
 },
