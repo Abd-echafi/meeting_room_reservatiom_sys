@@ -74,10 +74,11 @@ const createReview = async (req, res, next) => {
 
 const getAllReviewsForRoom = async (req, res, next) => {
   try {
+    console.log("okkk");
     let { sortRating, sortTime } = req.query
     let rating = [];
     rating[0] = req.query.rating;
-    const room_id = req.body.id;
+    const room_id = req.params.room_id;
     if (!room_id) {
       res.status(400).json({
         status: "fail",
@@ -130,6 +131,7 @@ const getAllReviewsForRoom = async (req, res, next) => {
 
 const getReviewById = async (req, res) => {
   try {
+
     const review = await Review.findByPk(req.params.id, {
       include: [
         {
@@ -162,6 +164,7 @@ const getReviewById = async (req, res) => {
 
 const updateReview = async (req, res) => {
   try {
+
     const review = await Review.findByPk(req.params.id);
     if (req.user.id !== review.user_id) {
       return res.status(401).json({

@@ -58,7 +58,7 @@ app.use('/api/v1/user', userRouter);
 app.use("/api/v1/rooms", roomRouter);
 app.use("/api/v1/bookings", bookingRouter);
 app.use('/api/v1/notifications', notificaionRouter);
-app.use('/api/v1/reviews/', ReviewRouter);
+app.use('/api/v1/reviews', ReviewRouter);
 // Handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({
