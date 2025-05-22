@@ -105,7 +105,7 @@ const getAllReviewsForRoom = async (req, res, next) => {
         {
           model: User,
           as: "user",
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'email', "image"],
         },
         {
           model: Room,
@@ -135,7 +135,7 @@ const getReviewById = async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'email', 'image'],
         },
         {
           model: Room,

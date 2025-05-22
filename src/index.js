@@ -30,7 +30,7 @@ app.use(session({
     cookie: { secure: false }   // Set to true if using https, or in production environments
 }));
 app.use(cors({
-    origin: 'http://localhost:5173', // Your frontend domain
+    origin: ['http://localhost:5173', 'https://room-reservation-lovat.vercel.app'], // Your frontend domain
     credentials: true,               // Important! Allows sending cookies
 }));
 // Initialize Passport.js
