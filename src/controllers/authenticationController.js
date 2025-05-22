@@ -191,7 +191,7 @@ const protect = async (req, res, next) => {
   try {
     // Get token from header
     const token = req.cookies.jwt;
-
+    console.log(token);
     // Check token presence
     if (!token) {
       return next(new AppError('You are not logged in! Please log in to get access.', 401));
