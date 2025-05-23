@@ -118,6 +118,43 @@ const updateBooking = async (req, res, next) => {
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
+    const { room_id, start_time, end_time } = booking;
+    let coincideBooking;
+    if (req.body.status === "Confirmed" && booking.status !== "Confirmed") {
+      coincideBooking = await Booking.findOne({
+        where: {
+          room_id: room_id,
+          id: { [Op.ne]: booking.id },
+          [Op.or]: [
+            {
+              start_time: {
+                [Op.between]: [start_time, end_time],
+              },
+            },
+            {
+              end_time: {
+                [Op.between]: [start_time, end_time],
+              },
+            },
+            {
+              start_time: {
+                [Op.lte]: start_time,
+              },
+              end_time: {
+                [Op.gte]: end_time,
+              },
+            },
+          ],
+          status: "Confirmed",
+        }
+      })
+    }
+    if (coincideBooking) {
+      return res.status(409).json({
+        status: "fail",
+        message: "you can not confirm that booking an accepted coincide booking already exists ",
+      })
+    }
     req.body.OldStatus = booking.status;
     await booking.update(req.body)
     const updatedBooking = await Booking.findByPk(req.params.id);
