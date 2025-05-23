@@ -3,6 +3,7 @@ const AppError = require('../utils/AppError');
 const APIFeatures = require('../utils/feautures');
 const Room = require('../models/roomModel');
 const User = require('../models/user.model');
+const { Op } = require('sequelize');
 const getAllBookings = async (req, res, next) => {
   try {
     const features = new APIFeatures(Booking, req.query)
@@ -92,7 +93,6 @@ const createBooking = async (req, res, next) => {
             },
           },
         ],
-        status: "Confirmed",
       }
     })
     if (coincideBooking) {

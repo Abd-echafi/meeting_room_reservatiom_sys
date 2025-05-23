@@ -16,6 +16,7 @@ const signToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, {
 
 // Send Token Response
 const createSendToken = (user, statusCode, res) => {
+
   const token = signToken(user.id);
 
   // Exclude password from response
@@ -135,7 +136,7 @@ const sendResetCode = async (req, res, next) => {
 
     return res.status(200).json({ success: true, message: 'Password reset code sent to email' });
   } catch (err) {
-    console.log(err.message);
+
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 }
@@ -191,9 +192,7 @@ const resetPassword = async (req, res) => {
 const protect = async (req, res, next) => {
   try {
     // Get token from header
-    console.log("cookie :", req.cookies);
     const token = req.cookies.jwt;
-    console.log("token : ", token);
     // Check token presence
     if (!token) {
       return next(new AppError('You are not logged in! Please log in to get access.', 401));
@@ -285,16 +284,15 @@ passport.use(new GoogleStrategy({
 ));
 // Serialize user (store user.id in session)
 passport.serializeUser((user, done) => {
-  console.log("Serializing user:", user);
+
   done(null, user.id);  // Store the user ID in session
 });
 
 // Deserialize user (find user from session ID)
 passport.deserializeUser((id, done) => {
-  console.log("Deserializing user with ID:", id);
+
   User.findByPk(id)  // Using Sequelize's findByPk to find the user by ID
     .then(user => {
-      console.log("Found user:", user);
       done(null, user);  // Attach the full user object to the session
     })
     .catch(err => done(err, null));  // Handle errors if user is not found
