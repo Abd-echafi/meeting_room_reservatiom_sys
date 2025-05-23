@@ -29,33 +29,40 @@ const getAllBookingsSpecial = async (req, res, next) => {
     const now = new Date();
     let start;
     let end;
-    console.log(period);
     if (period === "today") {
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 59, 0);
+      start = new Date(now);
       end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 1, 0);
     } else {
       if (period === "tomorrow") {
         const tomorrow = new Date(now);
         tomorrow.setDate(now.getDate() + 1);
-        start = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 6, 59, 0);
+        start = new Date(now);
         end = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 18, 1, 0);
       } else {
-        const startWeek = new Date(now);
-        const endWeek = new Date(now);
-        endWeek.setDate(endWeek.getDate() + 7);
-        start = new Date(startWeek.getFullYear(), startWeek.getMonth(), startWeek.getDate(), 6, 59, 0);
-        end = new Date(endWeek.getFullYear(), endWeek.getMonth(), endWeek.getDate(), 18, 1, 0);
+        if (period === "ThisWeek") {
+          const endWeek = new Date(now);
+          endWeek.setDate(endWeek.getDate() + 7);
+          start = new Date(now);
+          end = new Date(endWeek.getFullYear(), endWeek.getMonth(), endWeek.getDate(), 18, 1, 0);
+        } else {
+          console.log("okk");
+          start = new Date(now);
+          const ending = new Date(now);
+          ending.setMonth(ending.getMonth() + 2);
+          end = new Date(ending.getFullYear(), ending.getMonth(), ending.getDate(), 18, 1, 0);
+        }
+
       }
     }
-    console.log("start : ", start);
-    console.log("end : ", end);
     const bookings = await Booking.findAll({
+      user_id: req.user.id,
       where: {
         start_time: {
           [Op.between]: [start, end],
         },
         status: "Confirmed",
-      }
+      },
+      order: [['start_time', 'ASC']]
     })
     res.status(200).json({
       status: "success",

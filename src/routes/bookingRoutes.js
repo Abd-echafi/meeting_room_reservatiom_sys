@@ -6,7 +6,7 @@ const Router = express.Router();
 Router.route("/")
   .get(protect, restrictTo('Admin', 'Booking Manager'), getAllBookings)
   .post(protect, createBooking)
-Router.route("/overviewBookings").get(getAllBookingsSpecial);
+Router.route("/overviewBookings").get(protect, getAllBookingsSpecial);
 Router.route('/user/:id').get(protect, getBookingsByUser)
 Router.route('/:id')
   .get(protect, restrictTo('Admin', 'Booking Manager', 'Client'), getOneBookingById)
