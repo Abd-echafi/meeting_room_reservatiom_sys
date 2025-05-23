@@ -21,6 +21,50 @@ const getAllBookings = async (req, res, next) => {
   }
 }
 
+//special get bookings
+const getAllBookingsSpecial = async (req, res, next) => {
+  try {
+    console.log(req.query);
+    const { period } = req.query;
+    const now = new Date();
+    let start;
+    let end;
+    console.log(period);
+    if (period === "today") {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 59, 0);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 1, 0);
+    } else {
+      if (period === "tomorrow") {
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        start = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 6, 59, 0);
+        end = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 18, 1, 0);
+      } else {
+        const startWeek = new Date(now);
+        const endWeek = new Date(now);
+        endWeek.setDate(endWeek.getDate() + 7);
+        start = new Date(startWeek.getFullYear(), startWeek.getMonth(), startWeek.getDate(), 6, 59, 0);
+        end = new Date(endWeek.getFullYear(), endWeek.getMonth(), endWeek.getDate(), 18, 1, 0);
+      }
+    }
+    console.log("start : ", start);
+    console.log("end : ", end);
+    const bookings = await Booking.findAll({
+      where: {
+        start_time: {
+          [Op.between]: [start, end],
+        },
+        status: "Confirmed",
+      }
+    })
+    res.status(200).json({
+      status: "success",
+      bookings,
+    })
+  } catch (err) {
+    return next(new AppError(err.message, 400));
+  }
+}
 const getOneBookingById = async (req, res, next) => {
   try {
     const booking = await Booking.findByPk(req.params.id, {
@@ -177,4 +221,4 @@ const deleteBooking = async (req, res, next) => {
 }
 
 
-module.exports = { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings, getBookingsByUser }
+module.exports = { deleteBooking, updateBooking, createBooking, getOneBookingById, getAllBookings, getBookingsByUser, getAllBookingsSpecial }
