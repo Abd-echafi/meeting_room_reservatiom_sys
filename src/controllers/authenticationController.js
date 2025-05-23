@@ -254,25 +254,33 @@ passport.use(new GoogleStrategy({
     : "http://localhost:3000/api/v1/auth/callback",
   passReqToCallback: true
 },
-  function (request, accessToken, refreshToken, profile, done) {
-    console.log(profile);
-    // Generate a random password
-    const randomPassword = crypto.randomBytes(8).toString('hex');
+  async function (request, accessToken, refreshToken, profile, done) {
+    try {
+      const email = profile.emails?.[0]?.value;
+      const googleId = profile.id;
 
-    User.findOrCreate({
-      where: { id: profile.id },
-      defaults: {
-        name: profile.displayName,
-        email: profile.emails?.[0]?.value,
-        password: randomPassword,
-        id: profile.id
+      let existingUser = await User.findOne({ where: { email } });
+
+      if (existingUser) {
+        if (!existingUser.googleId) {
+          existingUser.googleId = googleId;
+          await existingUser.save();
+        }
+        return done(null, existingUser);
+      } else {
+        const randomPassword = crypto.randomBytes(8).toString('hex');
+        const newUser = await User.create({
+          name: profile.displayName,
+          email,
+          password: randomPassword,
+          googleId
+        });
+        return done(null, newUser);
       }
-    })
-      .then(([user, created]) => {
-        console.log(user);
-        return done(null, user);
-      })
-      .catch(err => done(err));
+
+    } catch (err) {
+      return done(err);
+    }
   }
 ));
 // Serialize user (store user.id in session)

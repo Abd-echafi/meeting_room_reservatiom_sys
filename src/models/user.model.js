@@ -68,6 +68,10 @@ const User = sequelize.define('User', {
   passwordChangedAt: {
     type: DataTypes.DATE,
     allowNull: true,
+  },
+  googleId: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'users',
