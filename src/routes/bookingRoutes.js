@@ -5,7 +5,7 @@ const Router = express.Router();
 
 Router.route("/")
   .get(protect, restrictTo('Admin', 'Booking Manager'), getAllBookings)
-  .post(protect, restrictTo('Client', 'Admin', 'Booking Manager'), createBooking)
+  .post(protect, createBooking)
 
 Router.route('/user/:id').get(protect, getBookingsByUser)
 Router.route('/:id')

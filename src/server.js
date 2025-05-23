@@ -20,7 +20,7 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Connection has been established successfully.');
-
+    // await sequelize.sync({ alter: true });
     httpServer.listen(PORT, () => {
       console.log(`Server running on port 3000`);
     });

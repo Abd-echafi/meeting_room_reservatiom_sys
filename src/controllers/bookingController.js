@@ -60,8 +60,49 @@ const getBookingsByUser = async (req, res, next) => {
 
 const createBooking = async (req, res, next) => {
   try {
+    const user_id = req.user.id;
+    const { room_id, start_time, end_time } = req.body;
+    if (new Date(start_time) >= new Date(end_time)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "start_time must be before end_time",
+      });
+    }
+    const coincideBooking = await Booking.findOne({
+      where: {
+        room_id: room_id,
+        user_id: user_id,
+        [Op.or]: [
+          {
+            start_time: {
+              [Op.between]: [start_time, end_time],
+            },
+          },
+          {
+            end_time: {
+              [Op.between]: [start_time, end_time],
+            },
+          },
+          {
+            start_time: {
+              [Op.lte]: start_time,
+            },
+            end_time: {
+              [Op.gte]: end_time,
+            },
+          },
+        ],
+        status: "Confirmed",
+      }
+    })
+    if (coincideBooking) {
+      return res.status(409).json({
+        status: "fail",
+        message: "you already bookied this room for that time",
+      })
+    }
     const booking = await Booking.create(req.body);
-    res.status(200).json({
+    res.status(201).json({
       status: "success",
       booking,
     })
