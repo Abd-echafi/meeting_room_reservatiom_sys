@@ -38,6 +38,7 @@ const Room = sequelize.define('Room', {
   },
   rating: {
     type: DataTypes.INTEGER,
+    defaultValue: 0,
   },
   pricing: {
     type: DataTypes.FLOAT,

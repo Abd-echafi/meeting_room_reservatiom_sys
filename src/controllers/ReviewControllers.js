@@ -41,9 +41,9 @@ const createReview = async (req, res, next) => {
       where: {
         user_id: user_id,
         room_id: room_id,
-        end_time: {
-          [Op.lt]: new Date(),
-        },
+        // end_time: {
+        //   [Op.lt]: new Date(),
+        // },
         status: "Confirmed",
       },
     })
