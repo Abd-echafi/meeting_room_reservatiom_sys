@@ -54,15 +54,17 @@ const getAllBookingsSpecial = async (req, res, next) => {
 
       }
     }
+    console.log(req.user.id);
     const bookings = await Booking.findAll({
-      user_id: req.user.id,
       where: {
         start_time: {
           [Op.between]: [start, end],
         },
         status: "Confirmed",
+        user_id: req.user.id,
       },
-      order: [['start_time', 'ASC']]
+      order: [['start_time', 'ASC']],
+
     })
     res.status(200).json({
       status: "success",
