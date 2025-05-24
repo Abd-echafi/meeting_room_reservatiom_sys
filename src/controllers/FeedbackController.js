@@ -52,23 +52,25 @@ const getAllFeedbacks = async (req, res, next) => {
       },
       limit: limit,
     });
-    const fnalFeedback = {};
+
+    const finalArray = [];
     feedbacks.forEach((feedback) => {
-      fnalFeedback.name = feedback.userName;
-      fnalFeedback.email = feedback.email;
+      const finalFeedback = {};
+      finalFeedback.name = feedback.userName;
+      finalFeedback.email = feedback.email;
       const createdAt = feedback.created_at;
       const day = String(createdAt.getDate()).padStart(2, '0');
       const month = String(createdAt.getMonth() + 1).padStart(2, '0');
       const year = createdAt.getFullYear();
-      fnalFeedback.date = `${day}/${month}/${year}`;
-      fnalFeedback.rating = feedback.rating;
-      fnalFeedback.seen = feedback.seen;
-      fnalFeedback.image = feedback.user?.image;
+      finalFeedback.date = `${day}/${month}/${year}`;
+      finalFeedback.rating = feedback.rating;
+      finalFeedback.seen = feedback.seen;
+      finalFeedback.image = feedback.user?.image;
+      finalArray.push(finalFeedback)
     })
-    const data = { ...fnalFeedback };
     res.status(200).json({
       status: "success",
-      data,
+      data: finalArray,
     })
   } catch (err) {
     return next(new AppError(err.message, 400));
