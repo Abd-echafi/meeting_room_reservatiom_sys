@@ -3,6 +3,7 @@ const User = require('../models/user.model');
 const { Op } = require('sequelize');
 const Feedback = require('../models/FeedbackModel');
 const Booking = require('../models/bookingModel');
+const { any } = require('../middlewares/multer');
 // create feedback
 const createFeedback = async (req, res, next) => {
   try {
@@ -116,6 +117,19 @@ const getOneFeedback = async (req, res, next) => {
     return next(new AppError(err.message, 400));
   }
 }
+//update feedback 
+const updateFeedback = async (req, res, next) => {
+  try {
+    const feedback = await Feedback.findByPk(req.params.id)
+    const updatedFeedback = await feedback.update({ seen: req.body.seen });
+    res.status(200).json({
+      status: "success",
+      updatedFeedback,
+    })
+  } catch (err) {
+    return next(new AppError(err.message, 400));
+  }
+}
 // delete feedback
 const deleteFeedback = async (req, res, next) => {
   try {
@@ -135,4 +149,4 @@ const deleteFeedback = async (req, res, next) => {
   }
 }
 
-module.exports = { createFeedback, getAllFeedbacks, getOneFeedback, deleteFeedback }
+module.exports = { createFeedback, getAllFeedbacks, getOneFeedback, updateFeedback, deleteFeedback }
