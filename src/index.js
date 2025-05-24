@@ -13,6 +13,7 @@ const roomRouter = require('./routes/roomRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const notificaionRouter = require('./routes/notificationsRoutes');
 const ReviewRouter = require('./routes/ReviewRouter');
+const FeedbackRouter = require('./routes/FeedbackRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -59,6 +60,7 @@ app.use("/api/v1/rooms", roomRouter);
 app.use("/api/v1/bookings", bookingRouter);
 app.use('/api/v1/notifications', notificaionRouter);
 app.use('/api/v1/reviews', ReviewRouter);
+app.use('/api/v1/feedbacks', FeedbackRouter)
 // Handle 404 errors
 app.use((req, res, next) => {
     res.status(404).json({
