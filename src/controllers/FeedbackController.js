@@ -91,6 +91,7 @@ const getOneFeedback = async (req, res, next) => {
         status: "fail",
         message: "this feedback is no longer exists",
       })
+      return;
     }
     const fnalFeedback = {};
     fnalFeedback.userName = feedback.userName;
