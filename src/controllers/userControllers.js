@@ -126,7 +126,7 @@ const updateUserPassword = async (req, res, next) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
+    const user = await User.findByPk(req.params.id);
     await user.destroy();
     res.status(204).json({
     })
